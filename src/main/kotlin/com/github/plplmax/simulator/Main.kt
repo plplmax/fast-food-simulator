@@ -17,8 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.singleWindowApplication
 import com.github.plplmax.simulator.order.OrderStateOf
 import com.github.plplmax.simulator.restaurant.RestaurantOf
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 
 fun main() = singleWindowApplication {
     MaterialTheme {
@@ -34,11 +32,8 @@ private fun MainScreen() {
     val restaurant = remember { RestaurantOf(orderState) }
     OrderArea(orderState.customersSize, orderState.currentOrderId)
     LaunchedEffect(Unit) {
-        restaurant.start()
-        while (isActive) {
-            restaurant.makeOrder()
-            delay(2000)
-        }
+        restaurant.start(scope = this@LaunchedEffect)
+        restaurant.makeOrdersEndlessly()
     }
 }
 

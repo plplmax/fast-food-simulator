@@ -1,7 +1,8 @@
 package com.github.plplmax.simulator.restaurant
 
+import kotlinx.coroutines.CoroutineScope
+
 interface Restaurant {
-    fun start()
-    fun stop()
-    fun makeOrder()
+    fun start(scope: CoroutineScope)
+    suspend fun makeOrdersEndlessly(interval: Long = 2000L)
 }
