@@ -11,7 +11,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class RestaurantOf(
-    private val orderState: OrderState,
+    orderState: OrderState,
     private val cook: Cook = CookOf(),
     private val taker: OrderTaker = OrderTakerOf(cook, orderState),
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
