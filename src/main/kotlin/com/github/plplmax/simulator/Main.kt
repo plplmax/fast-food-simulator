@@ -15,12 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.singleWindowApplication
-import com.github.plplmax.simulator.kitchen.CookOf
-import com.github.plplmax.simulator.order.OrderTakerOf
-import kotlinx.coroutines.Dispatchers
+import com.github.plplmax.simulator.order.OrderStateOf
+import com.github.plplmax.simulator.restaurant.RestaurantOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 fun main() = singleWindowApplication {
     MaterialTheme {
@@ -32,12 +30,13 @@ fun main() = singleWindowApplication {
 
 @Composable
 private fun MainScreen() {
-    val taker = remember { OrderTakerOf(CookOf()) }
-    OrderArea(taker.waitingCustomers(), taker.currentOrderId())
+    val orderState = remember { OrderStateOf() }
+    val restaurant = remember { RestaurantOf(orderState) }
+    OrderArea(orderState.customersSize, orderState.currentOrderId)
     LaunchedEffect(Unit) {
-        launch(Dispatchers.Default) { taker.startWork() }
+        restaurant.start()
         while (isActive) {
-            taker.makeOrder()
+            restaurant.makeOrder()
             delay(2000)
         }
     }

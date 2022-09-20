@@ -3,7 +3,6 @@ package com.github.plplmax.simulator.order
 import com.github.plplmax.simulator.customer.Customer
 import com.github.plplmax.simulator.customer.CustomerOf
 import com.github.plplmax.simulator.kitchen.Cook
-import com.github.plplmax.simulator.kitchen.CookOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -13,9 +12,9 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
 class OrderTakerOf(
-    private val cook: Cook = CookOf(),
-    customers: Collection<Customer> = emptyList(),
-    private val state: OrderState = OrderStateOf()
+    private val cook: Cook,
+    private val state: OrderState,
+    customers: Collection<Customer> = emptyList()
 ) : OrderTaker {
     private val customers: ConcurrentLinkedQueue<Customer> = ConcurrentLinkedQueue(customers)
     private val lastId: AtomicInteger = AtomicInteger(0)
@@ -40,7 +39,4 @@ class OrderTakerOf(
             }
         }
     }
-
-    override fun waitingCustomers(): Int = this.state.customersSize
-    override fun currentOrderId(): Int = this.state.currentOrderId
 }
