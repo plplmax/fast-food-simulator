@@ -1,16 +1,22 @@
 package com.github.plplmax.simulator
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -26,6 +32,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.singleWindowApplication
+import com.github.plplmax.simulator.kitchen.KitchenState
+import com.github.plplmax.simulator.kitchen.KitchenStateOf
 import com.github.plplmax.simulator.order.OrderState
 import com.github.plplmax.simulator.order.OrderStateOf
 import com.github.plplmax.simulator.restaurant.RestaurantOf
@@ -45,10 +53,12 @@ fun main() = singleWindowApplication {
 @Composable
 private fun MainScreen() {
     val orderState = remember { OrderStateOf() }
-    val restaurant = remember { RestaurantOf(orderState) }
+    val kitchenState = remember { KitchenStateOf() }
+    val restaurant = remember { RestaurantOf(orderState, kitchenState) }
     Column(modifier = Modifier.heightIn(max = 260.dp)) {
         Row {
             OrderArea(state = orderState)
+            KitchenArea(state = kitchenState)
         }
     }
     LaunchedEffect(Unit) {
@@ -147,6 +157,63 @@ private fun TextCardContainer(modifier: Modifier = Modifier, content: @Composabl
 private fun OrderAreaPreview() {
     MaterialTheme(colors) {
         OrderArea()
+    }
+}
+
+@Composable
+private fun KitchenArea(state: KitchenState = KitchenStateOf()) {
+    val listState = rememberLazyListState()
+    Row(modifier = Modifier.padding(start = 24.dp)) {
+        SubcomposeFlexColumn {
+            InformationCard {
+                CurrentOrderText(state.currentOrderId)
+            }
+            InformationCard {
+                TextCardContainer {
+                    Text("Count of waiting orders:")
+                    Text("${state.waitingOrders.size}")
+                }
+            }
+        }
+        Row(
+            modifier = Modifier.padding(start = 24.dp).fillMaxHeight(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (state.waitingOrders.isEmpty()) {
+                InformationCard {
+                    TextCardContainer {
+                        Text("Waiting orders are empty")
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.background(color = AppColors.gray12),
+                    state = listState,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(items = state.waitingOrders, key = { order -> order.id() }) { order ->
+                        Text(
+                            "${order.id()}",
+                            modifier = Modifier.background(AppColors.gray16)
+                                .padding(start = 14.dp, top = 14.dp, end = 18.dp, bottom = 14.dp),
+                            color = MaterialTheme.colors.onBackground
+                        )
+                    }
+                }
+                VerticalScrollbar(
+                    adapter = rememberScrollbarAdapter(listState),
+                    modifier = Modifier.background(color = AppColors.gray12)
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun KitchenAreaPreview() {
+    MaterialTheme {
+        KitchenArea()
     }
 }
 
