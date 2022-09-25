@@ -2,9 +2,12 @@ package com.github.plplmax.simulator.restaurant
 
 import com.github.plplmax.simulator.kitchen.Cook
 import com.github.plplmax.simulator.kitchen.CookOf
+import com.github.plplmax.simulator.kitchen.KitchenState
 import com.github.plplmax.simulator.order.OrderState
 import com.github.plplmax.simulator.order.OrderTaker
 import com.github.plplmax.simulator.order.OrderTakerOf
+import com.github.plplmax.simulator.server.Server
+import com.github.plplmax.simulator.server.ServerOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,13 +18,16 @@ import kotlinx.coroutines.withContext
 
 class RestaurantOf(
     orderState: OrderState,
-    private val cook: Cook = CookOf(),
+    kitchenState: KitchenState,
+    private val server: Server = ServerOf(),
+    private val cook: Cook = CookOf(server, kitchenState),
     private val taker: OrderTaker = OrderTakerOf(cook, orderState),
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : Restaurant {
 
     override fun start(scope: CoroutineScope) {
         scope.launch(dispatcher) { taker.startWork() }
+        scope.launch(dispatcher) { cook.startWork() }
     }
 
     override suspend fun makeOrdersEndlessly(interval: Long) {

@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.singleWindowApplication
+import com.github.plplmax.simulator.kitchen.KitchenState
+import com.github.plplmax.simulator.kitchen.KitchenStateOf
 import com.github.plplmax.simulator.order.OrderState
 import com.github.plplmax.simulator.order.OrderStateOf
 import com.github.plplmax.simulator.restaurant.RestaurantOf
@@ -45,7 +47,8 @@ fun main() = singleWindowApplication {
 @Composable
 private fun MainScreen() {
     val orderState = remember { OrderStateOf() }
-    val restaurant = remember { RestaurantOf(orderState) }
+    val kitchenState = remember { KitchenStateOf() }
+    val restaurant = remember { RestaurantOf(orderState, kitchenState) }
     Column(modifier = Modifier.heightIn(max = 260.dp)) {
         Row {
             OrderArea(state = orderState)
