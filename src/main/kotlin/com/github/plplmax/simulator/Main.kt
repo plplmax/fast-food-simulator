@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.singleWindowApplication
 import com.github.plplmax.simulator.kitchen.KitchenState
 import com.github.plplmax.simulator.kitchen.KitchenStateOf
@@ -234,7 +234,7 @@ private fun KitchenArea(state: KitchenState = KitchenStateOf()) {
 private fun ColumnWithTitle(
     modifier: Modifier = Modifier,
     title: String = "Column title",
-    fontSize: TextUnit = TextUnit(14F, TextUnitType.Sp),
+    fontSize: TextUnit = 14.sp,
     content: @Composable () -> Unit
 ) {
     Column(modifier = modifier.padding(14.dp)) {
