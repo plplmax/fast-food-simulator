@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -29,7 +31,10 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.singleWindowApplication
 import com.github.plplmax.simulator.kitchen.KitchenState
@@ -38,6 +43,7 @@ import com.github.plplmax.simulator.order.OrderState
 import com.github.plplmax.simulator.order.OrderStateOf
 import com.github.plplmax.simulator.restaurant.RestaurantOf
 
+@ExperimentalUnitApi
 fun main() = singleWindowApplication {
     MaterialTheme(colors) {
         Box(
@@ -50,6 +56,7 @@ fun main() = singleWindowApplication {
     }
 }
 
+@ExperimentalUnitApi
 @Composable
 private fun MainScreen() {
     val orderState = remember { OrderStateOf() }
@@ -67,17 +74,22 @@ private fun MainScreen() {
     }
 }
 
+@ExperimentalUnitApi
 @Composable
 private fun OrderArea(state: OrderState = OrderStateOf()) {
-    SubcomposeFlexColumn {
-        InformationCard {
-            TextCardContainer {
-                Text("Wait to place orders: ")
-                Text("${state.customersSize}")
+    InformationCard {
+        ColumnWithTitle(title = "Order area") {
+            SubcomposeFlexColumn {
+                InformationCard {
+                    TextCardContainer {
+                        Text("Wait to place orders: ")
+                        Text("${state.customersSize}")
+                    }
+                }
+                InformationCard {
+                    CurrentOrderText(state.currentOrderId)
+                }
             }
-        }
-        InformationCard {
-            CurrentOrderText(state.currentOrderId)
         }
     }
 }
@@ -154,63 +166,86 @@ private fun TextCardContainer(modifier: Modifier = Modifier, content: @Composabl
 
 @Preview
 @Composable
+@ExperimentalUnitApi
 private fun OrderAreaPreview() {
     MaterialTheme(colors) {
         OrderArea()
     }
 }
 
+@ExperimentalUnitApi
 @Composable
 private fun KitchenArea(state: KitchenState = KitchenStateOf()) {
     val listState = rememberLazyListState()
-    Row(modifier = Modifier.padding(start = 24.dp)) {
-        SubcomposeFlexColumn {
-            InformationCard {
-                CurrentOrderText(state.currentOrderId)
-            }
-            InformationCard {
-                TextCardContainer {
-                    Text("Count of waiting orders:")
-                    Text("${state.waitingOrders.size}")
-                }
-            }
-        }
-        Row(
-            modifier = Modifier.padding(start = 24.dp).fillMaxHeight(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (state.waitingOrders.isEmpty()) {
-                InformationCard {
-                    TextCardContainer {
-                        Text("Waiting orders are empty")
+    InformationCard(modifier = Modifier.padding(start = 24.dp)) {
+        ColumnWithTitle(title = "Kitchen area") {
+            Row {
+                SubcomposeFlexColumn {
+                    InformationCard {
+                        CurrentOrderText(state.currentOrderId)
+                    }
+                    InformationCard {
+                        TextCardContainer {
+                            Text("Count of waiting orders:")
+                            Text("${state.waitingOrders.size}")
+                        }
                     }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.background(color = AppColors.gray12),
-                    state = listState,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                Row(
+                    modifier = Modifier.fillMaxHeight().padding(start = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    items(items = state.waitingOrders, key = { order -> order.id() }) { order ->
-                        Text(
-                            "${order.id()}",
-                            modifier = Modifier.background(AppColors.gray16)
-                                .padding(start = 14.dp, top = 14.dp, end = 18.dp, bottom = 14.dp),
-                            color = MaterialTheme.colors.onBackground
+                    if (state.waitingOrders.isEmpty()) {
+                        InformationCard {
+                            TextCardContainer {
+                                Text("Waiting orders are empty")
+                            }
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxHeight()
+                                .background(color = MaterialTheme.colors.background)
+                                .padding(start = 4.dp, top = 4.dp, end = 4.dp),
+                            state = listState
+                        ) {
+                            items(items = state.waitingOrders, key = { order -> order.id() }) { order ->
+                                Text(
+                                    "#${order.id()}",
+                                    modifier = Modifier.background(AppColors.gray16)
+                                        .padding(start = 14.dp, top = 14.dp, end = 18.dp, bottom = 14.dp),
+                                    color = MaterialTheme.colors.onBackground
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+                        }
+                        VerticalScrollbar(
+                            adapter = rememberScrollbarAdapter(listState),
+                            modifier = Modifier.background(color = AppColors.gray12)
                         )
                     }
                 }
-                VerticalScrollbar(
-                    adapter = rememberScrollbarAdapter(listState),
-                    modifier = Modifier.background(color = AppColors.gray12)
-                )
             }
         }
     }
 }
 
+@ExperimentalUnitApi
+@Composable
+private fun ColumnWithTitle(
+    modifier: Modifier = Modifier,
+    title: String = "Column title",
+    fontSize: TextUnit = TextUnit(14F, TextUnitType.Sp),
+    content: @Composable () -> Unit
+) {
+    Column(modifier = modifier.padding(14.dp)) {
+        Text(text = title, fontSize = fontSize)
+        content()
+    }
+}
+
 @Preview
 @Composable
+@ExperimentalUnitApi
 private fun KitchenAreaPreview() {
     MaterialTheme {
         KitchenArea()
