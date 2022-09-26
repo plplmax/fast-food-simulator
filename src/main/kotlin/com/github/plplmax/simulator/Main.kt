@@ -218,8 +218,8 @@ private fun KitchenAreaPreview() {
 }
 
 @Composable
-private fun CurrentOrderText(currentOrderId: Int) {
-    val text = if (currentOrderId == 0) "N/A" else currentOrderId.toString()
+private fun CurrentOrderText(currentOrderId: UInt) {
+    val text = if (currentOrderId == 0U) "N/A" else currentOrderId.toString()
     TextCardContainer {
         Text("Number of current order: ")
         Text(text, modifier = Modifier.padding(start = 14.dp))

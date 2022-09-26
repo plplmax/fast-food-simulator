@@ -7,6 +7,6 @@ import androidx.compose.runtime.setValue
 import com.github.plplmax.simulator.order.Order
 
 class KitchenStateOf : KitchenState {
-    override var currentOrderId: Int by mutableStateOf(0)
+    override var currentOrderId: UInt by mutableStateOf(0U)
     override val waitingOrders: MutableList<Order> = mutableStateListOf()
 }

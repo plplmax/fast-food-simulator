@@ -1,5 +1,5 @@
 package com.github.plplmax.simulator.order
 
-class OrderOf(private val id: Int) : Order {
-    override fun id(): Int = this.id
+class OrderOf(private val id: UInt) : Order {
+    override fun id(): UInt = this.id
 }

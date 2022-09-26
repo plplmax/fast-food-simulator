@@ -30,7 +30,7 @@ class OrderTakerOf(
             if (customer == null) {
                 yield()
             } else {
-                val order = OrderOf(lastId.incrementAndGet())
+                val order = OrderOf(lastId.incrementAndGet().toUInt())
                 state.currentOrderId = order.id()
                 delay(5000)
                 cook.makeOrder(order)
