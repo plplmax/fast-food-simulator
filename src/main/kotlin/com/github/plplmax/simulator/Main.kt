@@ -31,7 +31,6 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -43,7 +42,6 @@ import com.github.plplmax.simulator.order.OrderState
 import com.github.plplmax.simulator.order.OrderStateOf
 import com.github.plplmax.simulator.restaurant.RestaurantOf
 
-@ExperimentalUnitApi
 fun main() = singleWindowApplication {
     MaterialTheme(colors) {
         Box(
@@ -56,7 +54,6 @@ fun main() = singleWindowApplication {
     }
 }
 
-@ExperimentalUnitApi
 @Composable
 private fun MainScreen() {
     val orderState = remember { OrderStateOf() }
@@ -74,7 +71,6 @@ private fun MainScreen() {
     }
 }
 
-@ExperimentalUnitApi
 @Composable
 private fun OrderArea(state: OrderState = OrderStateOf()) {
     InformationCard {
@@ -166,14 +162,12 @@ private fun TextCardContainer(modifier: Modifier = Modifier, content: @Composabl
 
 @Preview
 @Composable
-@ExperimentalUnitApi
 private fun OrderAreaPreview() {
     MaterialTheme(colors) {
         OrderArea()
     }
 }
 
-@ExperimentalUnitApi
 @Composable
 private fun KitchenArea(state: KitchenState = KitchenStateOf()) {
     val listState = rememberLazyListState()
@@ -229,7 +223,6 @@ private fun KitchenArea(state: KitchenState = KitchenStateOf()) {
     }
 }
 
-@ExperimentalUnitApi
 @Composable
 private fun ColumnWithTitle(
     modifier: Modifier = Modifier,
@@ -245,7 +238,6 @@ private fun ColumnWithTitle(
 
 @Preview
 @Composable
-@ExperimentalUnitApi
 private fun KitchenAreaPreview() {
     MaterialTheme {
         KitchenArea()
