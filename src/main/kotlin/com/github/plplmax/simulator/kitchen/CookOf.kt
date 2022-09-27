@@ -20,12 +20,13 @@ class CookOf(
             } else {
                 state.currentOrderId = processingOrder.id()
                 delay(10000)
-                // TODO: 25.09.2022 call server.put(order)
+                server.completeOrder(processingOrder)
             }
         }
     }
 
     override fun makeOrder(order: Order) {
         state.waitingOrders.add(order)
+        server.afterOrderMaked()
     }
 }

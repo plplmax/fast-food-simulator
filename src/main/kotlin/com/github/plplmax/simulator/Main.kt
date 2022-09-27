@@ -41,6 +41,8 @@ import com.github.plplmax.simulator.kitchen.KitchenStateOf
 import com.github.plplmax.simulator.order.OrderState
 import com.github.plplmax.simulator.order.OrderStateOf
 import com.github.plplmax.simulator.restaurant.RestaurantOf
+import com.github.plplmax.simulator.server.ServerState
+import com.github.plplmax.simulator.server.ServerStateOf
 
 fun main() = singleWindowApplication {
     MaterialTheme(colors) {
@@ -58,7 +60,8 @@ fun main() = singleWindowApplication {
 private fun MainScreen() {
     val orderState = remember { OrderStateOf() }
     val kitchenState = remember { KitchenStateOf() }
-    val restaurant = remember { RestaurantOf(orderState, kitchenState) }
+    val serverState = remember { ServerStateOf() }
+    val restaurant = remember { RestaurantOf(orderState, kitchenState, serverState) }
     Column(modifier = Modifier.heightIn(max = 260.dp)) {
         Row {
             OrderArea(state = orderState)
