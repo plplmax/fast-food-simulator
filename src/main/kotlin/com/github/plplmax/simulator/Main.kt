@@ -62,10 +62,13 @@ private fun MainScreen() {
     val kitchenState = remember { KitchenStateOf() }
     val serverState = remember { ServerStateOf() }
     val restaurant = remember { RestaurantOf(orderState, kitchenState, serverState) }
-    Column(modifier = Modifier.heightIn(max = 260.dp)) {
-        Row {
+    Column {
+        Row(modifier = Modifier.heightIn(max = 260.dp)) {
             OrderArea(state = orderState)
             KitchenArea(state = kitchenState)
+        }
+        Row(modifier = Modifier.heightIn(max = 260.dp).padding(top = 24.dp)) {
+            ServerArea(state = serverState)
         }
     }
     LaunchedEffect(Unit) {
@@ -244,6 +247,25 @@ private fun ColumnWithTitle(
 private fun KitchenAreaPreview() {
     MaterialTheme {
         KitchenArea()
+    }
+}
+
+@Composable
+private fun ServerArea(state: ServerState) {
+    InformationCard {
+        ColumnWithTitle(title = "Server area") {
+            SubcomposeFlexColumn {
+                InformationCard {
+                    CurrentOrderText(state.currentOrderId)
+                }
+                InformationCard {
+                    TextCardContainer {
+                        Text("Number of waiting customers:")
+                        Text("${state.customersSize}", modifier = Modifier.padding(start = 14.dp))
+                    }
+                }
+            }
+        }
     }
 }
 
