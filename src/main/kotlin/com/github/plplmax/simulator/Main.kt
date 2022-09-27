@@ -41,6 +41,8 @@ import com.github.plplmax.simulator.kitchen.KitchenStateOf
 import com.github.plplmax.simulator.order.OrderState
 import com.github.plplmax.simulator.order.OrderStateOf
 import com.github.plplmax.simulator.restaurant.RestaurantOf
+import com.github.plplmax.simulator.server.ServerState
+import com.github.plplmax.simulator.server.ServerStateOf
 
 fun main() = singleWindowApplication {
     MaterialTheme(colors) {
@@ -58,11 +60,15 @@ fun main() = singleWindowApplication {
 private fun MainScreen() {
     val orderState = remember { OrderStateOf() }
     val kitchenState = remember { KitchenStateOf() }
-    val restaurant = remember { RestaurantOf(orderState, kitchenState) }
-    Column(modifier = Modifier.heightIn(max = 260.dp)) {
-        Row {
+    val serverState = remember { ServerStateOf() }
+    val restaurant = remember { RestaurantOf(orderState, kitchenState, serverState) }
+    Column {
+        Row(modifier = Modifier.heightIn(max = 260.dp)) {
             OrderArea(state = orderState)
             KitchenArea(state = kitchenState)
+        }
+        Row(modifier = Modifier.heightIn(max = 260.dp).padding(top = 24.dp)) {
+            ServerArea(state = serverState)
         }
     }
     LaunchedEffect(Unit) {
@@ -241,6 +247,25 @@ private fun ColumnWithTitle(
 private fun KitchenAreaPreview() {
     MaterialTheme {
         KitchenArea()
+    }
+}
+
+@Composable
+private fun ServerArea(state: ServerState) {
+    InformationCard {
+        ColumnWithTitle(title = "Server area") {
+            SubcomposeFlexColumn {
+                InformationCard {
+                    CurrentOrderText(state.currentOrderId)
+                }
+                InformationCard {
+                    TextCardContainer {
+                        Text("Number of waiting customers:")
+                        Text("${state.customersSize}", modifier = Modifier.padding(start = 14.dp))
+                    }
+                }
+            }
+        }
     }
 }
 
