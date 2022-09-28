@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 
 class CookOf(
     private val server: Server,
@@ -16,7 +15,7 @@ class CookOf(
         while (isActive) {
             val processingOrder = state.waitingOrders.removeFirstOrNull()
             if (processingOrder == null) {
-                yield()
+                delay(50)
             } else {
                 state.currentOrderId = processingOrder.id()
                 delay(10000)

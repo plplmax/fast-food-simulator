@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -26,7 +25,7 @@ class ServerOf(
                 --state.customersSize
                 state.currentOrderId = 0U
             } else {
-                yield()
+                delay(50)
             }
         }
     }

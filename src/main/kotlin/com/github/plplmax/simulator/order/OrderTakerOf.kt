@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -28,7 +27,7 @@ class OrderTakerOf(
         while (isActive) {
             val customer = customers.peek()
             if (customer == null) {
-                yield()
+                delay(50)
             } else {
                 val order = OrderOf(lastId.incrementAndGet().toUInt())
                 state.currentOrderId = order.id()
