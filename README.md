@@ -27,7 +27,7 @@ To build and run locally:
 ./gradlew run
 ```
 
-To only build:
+To build only:
 
 ```
 ./gradlew package(Deb|Dmg|Msi|UberJarForCurrentOS)
