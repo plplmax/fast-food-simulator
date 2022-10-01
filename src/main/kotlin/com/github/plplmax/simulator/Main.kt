@@ -14,19 +14,30 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.material.Button
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.SubcomposeMeasureScope
@@ -41,8 +52,12 @@ import com.github.plplmax.simulator.kitchen.KitchenStateOf
 import com.github.plplmax.simulator.order.OrderState
 import com.github.plplmax.simulator.order.OrderStateOf
 import com.github.plplmax.simulator.restaurant.RestaurantOf
+import com.github.plplmax.simulator.restaurant.RestaurantState
+import com.github.plplmax.simulator.restaurant.RestaurantStateOf
 import com.github.plplmax.simulator.server.ServerState
 import com.github.plplmax.simulator.server.ServerStateOf
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 fun main() = singleWindowApplication {
     MaterialTheme(colors) {
@@ -58,22 +73,27 @@ fun main() = singleWindowApplication {
 
 @Composable
 private fun MainScreen() {
-    val orderState = remember { OrderStateOf() }
-    val kitchenState = remember { KitchenStateOf() }
-    val serverState = remember { ServerStateOf() }
-    val restaurant = remember { RestaurantOf(orderState, kitchenState, serverState) }
-    Column {
-        Row(modifier = Modifier.heightIn(max = 260.dp)) {
+    val restaurantState = remember { RestaurantStateOf() }
+    val orderState = remember(restaurantState.started.value) { OrderStateOf() }
+    val kitchenState = remember(restaurantState.started.value) { KitchenStateOf() }
+    val serverState = remember(restaurantState.started.value) { ServerStateOf() }
+    val restaurant =
+        remember(restaurantState.started.value) { RestaurantOf(orderState, kitchenState, serverState, restaurantState) }
+    Row {
+        Column(verticalArrangement = Arrangement.SpaceBetween) {
             OrderArea(state = orderState)
-            KitchenArea(state = kitchenState)
+            SettingsArea(state = restaurantState)
         }
-        Row(modifier = Modifier.heightIn(max = 260.dp).padding(top = 24.dp)) {
+        Column(verticalArrangement = Arrangement.SpaceBetween) {
+            KitchenArea(state = kitchenState)
             ServerArea(state = serverState)
         }
     }
-    LaunchedEffect(Unit) {
-        restaurant.start(scope = this@LaunchedEffect)
-        restaurant.makeOrdersEndlessly()
+    LaunchedEffect(restaurantState.started.value) {
+        if (restaurantState.started.value) {
+            restaurant.start(scope = this@LaunchedEffect)
+            restaurant.makeOrdersEndlessly()
+        }
     }
 }
 
@@ -150,9 +170,10 @@ private fun SubcomposeMeasureScope.trimmedPlaceables(
 @Composable
 private fun InformationCard(
     modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.Center,
     content: @Composable () -> Unit
 ) {
-    BoxWithConstraints(contentAlignment = Alignment.Center) {
+    BoxWithConstraints(contentAlignment = contentAlignment) {
         Card(modifier = modifier.widthIn(min = minWidth), elevation = 4.dp) {
             content()
         }
@@ -177,7 +198,7 @@ private fun OrderAreaPreview() {
 @Composable
 private fun KitchenArea(state: KitchenState = KitchenStateOf()) {
     val listState = rememberLazyListState()
-    InformationCard(modifier = Modifier.padding(start = 24.dp)) {
+    InformationCard(modifier = Modifier.padding(start = 14.dp)) {
         ColumnWithTitle(title = "Kitchen area") {
             Row {
                 SubcomposeFlexColumn {
@@ -236,8 +257,11 @@ private fun ColumnWithTitle(
     fontSize: TextUnit = 14.sp,
     content: @Composable () -> Unit
 ) {
-    Column(modifier = modifier.padding(14.dp)) {
-        Text(text = title, fontSize = fontSize)
+    Column(
+        modifier = modifier.width(520.dp).heightIn(max = 260.dp).padding(14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = title, modifier = Modifier.padding(bottom = 14.dp), fontSize = fontSize)
         content()
     }
 }
@@ -251,8 +275,113 @@ private fun KitchenAreaPreview() {
 }
 
 @Composable
+private fun SettingsArea(state: RestaurantState) {
+    InformationCard(modifier = Modifier.padding(top = 14.dp)) {
+        ColumnWithTitle(title = "Settings area") {
+            var selectedCustomersInterval by remember { mutableStateOf("${state.customersInterval.value.inWholeSeconds}") }
+            var selectedCookInterval by remember { mutableStateOf("${state.cookInterval.value.inWholeSeconds}") }
+            var customersIntervalError by remember { mutableStateOf(false) }
+            var cookIntervalError by remember { mutableStateOf(false) }
+            val transform = remember {
+                { str: String ->
+                    runCatching {
+                        val value = str.toUByteOrNull()
+                        if (value == null || value == 0U.toUByte()) {
+                            error("Interval must be from 1 to 255")
+                        }
+                        value.toInt().toDuration(DurationUnit.SECONDS)
+                    }
+                }
+            }
+            Row(Modifier.padding(top = 14.dp)) {
+                SettingTextField(
+                    value = selectedCustomersInterval,
+                    columnModifier = Modifier.weight(1F),
+                    onValueChange = {
+                        selectedCustomersInterval = it
+                        customersIntervalError = false
+                    },
+                    transform = transform,
+                    onSuccessTransform = { state.customersInterval.value = it },
+                    onFailureTransform = { customersIntervalError = true },
+                    enabled = !state.started.value,
+                    label = { Text("Interval for customers arrival") },
+                    isError = customersIntervalError
+                )
+                SettingTextField(
+                    value = selectedCookInterval,
+                    columnModifier = Modifier.weight(1F).padding(start = 14.dp),
+                    onValueChange = {
+                        selectedCookInterval = it
+                        cookIntervalError = false
+                    },
+                    transform = transform,
+                    onSuccessTransform = { state.cookInterval.value = it },
+                    onFailureTransform = { cookIntervalError = true },
+                    enabled = !state.started.value,
+                    label = { Text("Interval for cook") },
+                    isError = cookIntervalError
+                )
+            }
+            Row {
+                Button(
+                    onClick = { state.started.value = true },
+                    modifier = Modifier.weight(1F),
+                    enabled = !customersIntervalError && !cookIntervalError && !state.started.value
+                ) {
+                    Text("Start")
+                }
+                Button(
+                    onClick = { state.started.value = false },
+                    modifier = Modifier.weight(1F).padding(start = 14.dp),
+                    enabled = state.started.value
+                ) {
+                    Text("Stop")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun <T> SettingTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    transform: (String) -> Result<T>,
+    onSuccessTransform: (T) -> Unit,
+    onFailureTransform: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    columnModifier: Modifier = Modifier,
+    label: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    errorMessage: MutableState<String> = remember { mutableStateOf("Error") },
+    singleLine: Boolean = true
+) {
+    Column(columnModifier) {
+        TextField(value, onValueChange = { str ->
+            onValueChange(str)
+            val result = transform(str)
+            result.onSuccess(onSuccessTransform)
+            result.onFailure {
+                errorMessage.value = it.message!!
+                onFailureTransform()
+            }
+        }, modifier, enabled, label = label, trailingIcon = {
+            if (isError) Icon(Icons.Filled.Warning, contentDescription = "Error", tint = MaterialTheme.colors.error)
+        }, isError = isError, singleLine = singleLine)
+        Text(
+            text = if (isError) errorMessage.value else "In seconds",
+            color = if (isError) MaterialTheme.colors.error else Color.Gray,
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.padding(start = 16.dp)
+        )
+    }
+}
+
+@Composable
 private fun ServerArea(state: ServerState) {
-    InformationCard {
+    InformationCard(modifier = Modifier.padding(start = 14.dp, top = 14.dp)) {
         ColumnWithTitle(title = "Server area") {
             SubcomposeFlexColumn {
                 InformationCard {
@@ -261,7 +390,7 @@ private fun ServerArea(state: ServerState) {
                 InformationCard {
                     TextCardContainer {
                         Text("Number of waiting customers:")
-                        Text("${state.customersSize}", modifier = Modifier.padding(start = 14.dp))
+                        Text("${state.customersSize}", modifier = Modifier.padding(start = 24.dp))
                     }
                 }
             }
@@ -274,6 +403,6 @@ private fun CurrentOrderText(currentOrderId: UInt) {
     val text = if (currentOrderId == 0U) "N/A" else currentOrderId.toString()
     TextCardContainer {
         Text("Number of current order: ")
-        Text(text, modifier = Modifier.padding(start = 14.dp))
+        Text(text, modifier = Modifier.padding(start = 24.dp))
     }
 }
