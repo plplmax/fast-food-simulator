@@ -4,5 +4,5 @@ import kotlinx.coroutines.CoroutineScope
 
 interface Restaurant {
     fun start(scope: CoroutineScope)
-    suspend fun makeOrdersEndlessly(interval: Long = 2000L)
+    suspend fun makeOrdersEndlessly()
 }

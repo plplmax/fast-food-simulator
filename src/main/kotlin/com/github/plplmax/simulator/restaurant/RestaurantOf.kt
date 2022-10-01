@@ -21,8 +21,9 @@ class RestaurantOf(
     orderState: OrderState,
     kitchenState: KitchenState,
     serverState: ServerState,
+    private val restaurantState: RestaurantState,
     private val server: Server = ServerOf(serverState),
-    private val cook: Cook = CookOf(server, kitchenState),
+    private val cook: Cook = CookOf(server, kitchenState, restaurantState.cookInterval),
     private val taker: OrderTaker = OrderTakerOf(cook, orderState),
     private val dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : Restaurant {
@@ -33,11 +34,11 @@ class RestaurantOf(
         scope.launch(dispatcher) { server.startWork() }
     }
 
-    override suspend fun makeOrdersEndlessly(interval: Long) {
+    override suspend fun makeOrdersEndlessly() {
         withContext(dispatcher) {
             while (isActive) {
                 taker.makeOrder()
-                delay(interval)
+                delay(restaurantState.customersInterval.value.inWholeMilliseconds)
             }
         }
     }
