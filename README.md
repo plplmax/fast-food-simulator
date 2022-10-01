@@ -35,4 +35,4 @@ To only build:
 
 After a build, output binaries can be found in `${project.buildDir}/compose/binaries`.
 
-For specific problems you can see [that](https://github.com/JetBrains/compose-jb/tree/master/tutorials/Native_distributions_and_local_execution) tutorial by [JetBrains](https://www.jetbrains.com/).
+For specific problems you can see [this](https://github.com/JetBrains/compose-jb/tree/master/tutorials/Native_distributions_and_local_execution) tutorial by [JetBrains](https://www.jetbrains.com/).
