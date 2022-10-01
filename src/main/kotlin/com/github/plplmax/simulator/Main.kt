@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.singleWindowApplication
 import com.github.plplmax.simulator.kitchen.KitchenState
 import com.github.plplmax.simulator.kitchen.KitchenStateOf
@@ -59,11 +61,21 @@ import com.github.plplmax.simulator.server.ServerStateOf
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-fun main() = singleWindowApplication {
+fun main() = singleWindowApplication(
+    state = WindowState(
+        width = 1200.dp,
+        height = 700.dp,
+        position = WindowPosition.Aligned(
+            Alignment.Center
+        )
+    ),
+    resizable = false
+) {
     MaterialTheme(colors) {
         Box(
             modifier = Modifier.background(MaterialTheme.colors.surface)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(14.dp),
             contentAlignment = Alignment.Center
         ) {
             MainScreen()
